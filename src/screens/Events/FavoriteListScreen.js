@@ -29,14 +29,11 @@ export default function FavoriteListScreen() {
         <View style={styles.container}>
             <Text style={styles.title}>Favorite Events</Text>
             <FlatList
-                data={favorites}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                    <View style={styles.event}>
-                        <Text>{item.name}</Text>
-                        <Button title="Remove" onPress={() => handleRemoveFavorite(item.id)} />
-                    </View>
-                )}
+              data={favorites}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <FavoriteCard favorite={item} onRemove={() => fetchFavorites()} />
+              )}
             />
         </View>
     );

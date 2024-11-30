@@ -26,11 +26,15 @@ export default function EventListScreen({ navigation }) {
             <Text style={styles.title}>Events</Text>
             <Button title="Logout" onPress={handleLogout} />
             <FlatList
-                data={events}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                    <Text style={styles.event}>{item.name}</Text>
-                )}
+              data={events}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <EventCard
+                  event={item}
+                  onEdit={(event) => navigation.navigate('AddEditEvent', { eventId: event.id, existingEvent: event })}
+                  onDelete={(eventId) => handleDelete(eventId)}
+                />
+              )}
             />
             <Button title="Add Event" onPress={() => navigation.navigate('AddEditEvent')} />
         </View>
