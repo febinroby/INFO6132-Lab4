@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
 import { auth, db } from '../../config/firebaseConfig';
 import { collection, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
+import FavoriteCard from '../../components/FavoriteCard';
 
 export default function FavoriteListScreen() {
     const [favorites, setFavorites] = useState([]);

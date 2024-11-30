@@ -3,6 +3,7 @@ import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
 import { auth, db } from '../../config/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
+import EventCard from '../../components/EventCard';
 
 export default function EventListScreen({ navigation }) {
     const [events, setEvents] = useState([]);
