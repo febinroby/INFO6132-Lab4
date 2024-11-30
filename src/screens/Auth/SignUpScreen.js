@@ -10,7 +10,7 @@ export default function SignUpScreen({ navigation }) {
     const handleSignUp = async () => {
         try {
             await createUserWithEmailAndPassword(auth, email, password);
-            navigation.replace('Login');
+            navigation.navigate('Login');
         } catch (error) {
             alert(error.message);
         }

@@ -1,40 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
-import { auth, db } from '../../config/firebaseConfig';
-import { collection, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, StyleSheet, Text } from 'react-native';
 import FavoriteCard from '../../components/FavoriteCard';
+import { auth, db } from '../../config/firebaseConfig';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 export default function FavoriteListScreen() {
     const [favorites, setFavorites] = useState([]);
 
-    const fetchFavorites = async () => {
-        const q = query(collection(db, 'favorites'), where('userId', '==', auth.currentUser.uid));
-        const querySnapshot = await getDocs(q);
-        setFavorites(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    };
-
-    const handleRemoveFavorite = async (favoriteId) => {
-        try {
-            await deleteDoc(doc(db, 'favorites', favoriteId));
-            fetchFavorites();
-        } catch (error) {
-            alert(error.message);
-        }
-    };
-
     useEffect(() => {
+        const fetchFavorites = async () => {
+            const q = query(collection(db, 'favorites'), where('userId', '==', auth.currentUser.uid));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                setFavorites(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+            });
+
+            return unsubscribe;
+        };
+
         fetchFavorites();
     }, []);
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Favorite Events</Text>
+            <Text style={styles.title}>Favorites</Text>
             <FlatList
-              data={favorites}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <FavoriteCard favorite={item} onRemove={() => fetchFavorites()} />
-              )}
+                data={favorites}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => <FavoriteCard favorite={item} />}
             />
         </View>
     );
@@ -43,5 +35,4 @@ export default function FavoriteListScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 20 },
     title: { fontSize: 24, textAlign: 'center', marginBottom: 20 },
-    event: { padding: 10, borderBottomWidth: 1, flexDirection: 'row', justifyContent: 'space-between' },
 });

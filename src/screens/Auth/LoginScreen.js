@@ -10,7 +10,7 @@ export default function LoginScreen({ navigation }) {
     const handleLogin = async () => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            navigation.replace('EventList');
+            navigation.navigate('Main');
         } catch (error) {
             alert(error.message);
         }
