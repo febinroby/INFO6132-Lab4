@@ -60,14 +60,25 @@ export default function EventListScreen({ navigation }) {
 
     // Function to delete the event
     const deleteEvent = async (eventId) => {
-        try {
-            const eventRef = doc(db, 'events', eventId);
-            await deleteDoc(eventRef);
-            alert('Your event has been deleted successfully.');
-        } catch (error) {
-            alert('Your event could not be deleted.');
-        }
-    };
+      try {
+          const eventRef = doc(db, 'events', eventId);
+          // Delete the event
+          await deleteDoc(eventRef);
+  
+          // Also delete the event from the favorites collection
+          const favoritesRef = collection(db, 'favorites');
+          const favoritesQuery = query(favoritesRef, where('eventId', '==', eventId));
+          const querySnapshot = await getDocs(favoritesQuery);
+  
+          querySnapshot.forEach(async (doc) => {
+              await deleteDoc(doc.ref);  // Delete the favorite document
+          });
+  
+          alert('Your event has been deleted successfully.');
+      } catch (error) {
+          alert('There was an issue deleting your event.');
+      }
+  };
 
     // Function to handle toggling favorites
     const toggleFavorite = async (eventId) => {
