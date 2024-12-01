@@ -11,15 +11,13 @@ export default function FavoriteListScreen() {
 
     const fetchFavoritesWithDetails = useCallback(() => {
         const fetchEventDetails = async (favoriteDocs) => {
-            console.log("Fetched favoriteDocs:", favoriteDocs); // Debugging line
             const favoriteData = await Promise.all(
                 favoriteDocs.map(async (favDoc) => {
                     const { userId, eventId } = favDoc;  // Extract userId and eventId from favorite
                     const eventDoc = await getDoc(doc(db, 'events', eventId));  // Fetch event using eventId
 
                     if (eventDoc.exists()) {
-                        const eventData = eventDoc.data(); // Get event data
-                        console.log("Fetched event data:", eventData); // Debugging line
+                        const eventData = eventDoc.data(); // Get event data                
 
                         return {
                             id: favDoc.id, // The favorite document ID
@@ -38,7 +36,6 @@ export default function FavoriteListScreen() {
         const q = query(collection(db, 'favorites'), where('userId', '==', auth.currentUser.uid));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const favoriteDocs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            console.log("Favorite docs from Firestore:", favoriteDocs); // Debugging line
             fetchEventDetails(favoriteDocs); // Fetch detailed event data using eventId
         });
 
