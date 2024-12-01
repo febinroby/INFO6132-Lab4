@@ -20,15 +20,35 @@ export default function LogoutScreen({ navigation }) {
             }},
         ]
     );
-};
+  };
 
-    return (
-        <View style={styles.container}>
-            <Button title="Logout" onPress={handleLogout} color="red" />
+  return (
+    <View style={styles.container}>
+        <View style={styles.card}>
+            <Button title="Logout" onPress={handleLogout} color="#fff" />
         </View>
-    );
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f9fa',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    card: {
+        width: '80%',
+        backgroundColor: '#d9534f', // Red color for logout button
+        borderRadius: 10,
+        elevation: 5,
+        shadowColor: '#333',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+    },
 });

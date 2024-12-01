@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons'; // For the heart icon
 
 const EventCard = ({ event, isFavorite, onFavoriteToggle, onEdit, onDelete }) => {
@@ -12,15 +12,19 @@ const EventCard = ({ event, isFavorite, onFavoriteToggle, onEdit, onDelete }) =>
             <View style={styles.buttonContainer}>
                 {event.createdBy && (
                     <>
-                        <Button title="Edit" onPress={() => onEdit(event)} />
-                        <Button title="Delete" onPress={() => onDelete(event.id)} color="red" />
+                        <TouchableOpacity style={styles.editButton} onPress={() => onEdit(event)}>
+                            <Text style={styles.buttonText}>Edit</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.deleteButton} onPress={() => onDelete(event.id)}>
+                            <Text style={styles.buttonText}>Delete</Text>
+                        </TouchableOpacity>
                     </>
                 )}
                 <TouchableOpacity onPress={onFavoriteToggle}>
                     <FontAwesome
                         name={isFavorite ? 'heart' : 'heart-o'}
                         size={24}
-                        color={isFavorite ? 'red' : 'gray'}
+                        color={isFavorite ? '#e74c3c' : '#bdc3c7'}
                     />
                 </TouchableOpacity>
             </View>
@@ -30,30 +34,47 @@ const EventCard = ({ event, isFavorite, onFavoriteToggle, onEdit, onDelete }) =>
 
 const styles = StyleSheet.create({
     card: {
-        padding: 15,
-        marginVertical: 10,
-        backgroundColor: '#ffffff',
+        padding: 20,
+        marginVertical: 15,
+        backgroundColor: '#fff',
         borderRadius: 10,
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.3,
-        shadowRadius: 2,
+        shadowColor: '#333',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 5,
     },
     title: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 5,
+        marginBottom: 8,
+        color: '#2c3e50',
     },
     description: {
-        fontSize: 14,
-        color: '#555',
-        marginBottom: 10,
+        fontSize: 16,
+        color: '#7f8c8d',
+        marginBottom: 15,
     },
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+    },
+    editButton: {
+        backgroundColor: '#3498db',
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 5,
+    },
+    deleteButton: {
+        backgroundColor: '#e74c3c',
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 5,
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
 });
 

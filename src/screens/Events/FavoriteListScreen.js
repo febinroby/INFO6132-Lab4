@@ -13,30 +13,30 @@ export default function FavoriteListScreen() {
         const fetchEventDetails = async (favoriteDocs) => {
             const favoriteData = await Promise.all(
                 favoriteDocs.map(async (favDoc) => {
-                    const { userId, eventId } = favDoc;  // Extract userId and eventId from favorite
-                    const eventDoc = await getDoc(doc(db, 'events', eventId));  // Fetch event using eventId
+                    const { userId, eventId } = favDoc;
+                    const eventDoc = await getDoc(doc(db, 'events', eventId));
 
                     if (eventDoc.exists()) {
-                        const eventData = eventDoc.data(); // Get event data                
+                        const eventData = eventDoc.data();
 
                         return {
-                            id: favDoc.id, // The favorite document ID
-                            userId, 
+                            id: favDoc.id,
+                            userId,
                             eventId,
-                            eventData, // Merge event data
+                            eventData,
                         };
                     }
                     return null;
                 })
             );
-            setFavorites(favoriteData.filter(Boolean)); // Filter out null results
+            setFavorites(favoriteData.filter(Boolean));
             setLoading(false);
         };
 
         const q = query(collection(db, 'favorites'), where('userId', '==', auth.currentUser.uid));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const favoriteDocs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            fetchEventDetails(favoriteDocs); // Fetch detailed event data using eventId
+            fetchEventDetails(favoriteDocs);
         });
 
         return unsubscribe;
@@ -56,20 +56,45 @@ export default function FavoriteListScreen() {
             ) : favorites.length === 0 ? (
                 <Text style={styles.emptyText}>No favorites yet!</Text>
             ) : (
-                <FlatList
-                    data={favorites}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <FavoriteCard favorite={item} onRemove={fetchFavoritesWithDetails} />
-                    )}
-                />
+                <>
+                    <Text style={styles.title}>Your Favorites</Text>
+                    <FlatList
+                        data={favorites}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <FavoriteCard favorite={item} onRemove={fetchFavoritesWithDetails} />
+                        )}
+                        ListEmptyComponent={<Text style={styles.emptyText}>No favorites found!</Text>}
+                    />
+                </>
             )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20 },
-    loadingText: { fontSize: 18, textAlign: 'center', marginTop: 20, color: 'gray' },
-    emptyText: { fontSize: 18, textAlign: 'center', marginTop: 20, color: 'gray' },
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f9fa',
+        padding: 20,
+    },
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#333',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+        marginTop: 20,
+    },
 });

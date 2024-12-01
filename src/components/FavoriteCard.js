@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { db } from '../config/firebaseConfig';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
@@ -46,7 +46,11 @@ export default function FavoriteCard({ favorite, onRemove }) {
             <Text style={styles.description}>
                 {favorite.eventData.description || 'No description provided'}
             </Text>
-            <Button title="Remove" onPress={handleRemoveFavorite} />
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.removeButton} onPress={handleRemoveFavorite}>
+                    <Text style={styles.buttonText}>Remove from Favorites</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
@@ -54,28 +58,42 @@ export default function FavoriteCard({ favorite, onRemove }) {
 const styles = StyleSheet.create({
     card: {
         padding: 20,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
+        marginBottom: 15,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        shadowColor: '#333',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 5,
     },
     title: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 5,
+        marginBottom: 8,
+        color: '#2c3e50',
     },
     description: {
-        fontSize: 14,
-        marginBottom: 10,
+        fontSize: 16,
+        color: '#7f8c8d',
+        marginBottom: 15,
     },
-    createdBy: {
-        fontSize: 12,
-        color: 'gray',
-        marginBottom: 10,
+    buttonContainer: {
+        alignItems: 'flex-start',
+    },
+    removeButton: {
+        backgroundColor: '#e74c3c',
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 5,
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
     errorText: {
         fontSize: 16,
         color: 'red',
         textAlign: 'center',
-    }
+    },
 });

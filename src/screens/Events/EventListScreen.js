@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet, Text, Alert, Button } from 'react-native';
+import { View, FlatList, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
 import EventCard from '../../components/EventCard';
 import { auth, db } from '../../config/firebaseConfig';
 import { collection, query, where, onSnapshot, doc, deleteDoc, getDocs, addDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function EventListScreen({ navigation }) {
     const [events, setEvents] = useState([]);
-    const [favorites, setFavorites] = useState(new Set()); // Track favorites as a Set of eventIds
+    const [favorites, setFavorites] = useState(new Set());
 
-    // Function to fetch events from Firestore
     const fetchEvents = async () => {
         const user = auth.currentUser;
-        if (!user) {
-            return;
-        }
+        if (!user) return;
 
-        const q = query(collection(db, 'events'), where('createdBy', '==', user.uid));  
+        const q = query(collection(db, 'events'), where('createdBy', '==', user.uid));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedEvents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
             setEvents(fetchedEvents);
@@ -25,21 +23,18 @@ export default function EventListScreen({ navigation }) {
         return unsubscribe;
     };
 
-    // Function to fetch favorite events for the current user
     const fetchFavorites = async () => {
         const user = auth.currentUser;
-        if (!user) {
-            return;
-        }
+        if (!user) return;
 
         const favoritesRef = collection(db, 'favorites');
         const q = query(favoritesRef, where('userId', '==', user.uid));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const favoriteEventIds = new Set();
-            snapshot.docs.forEach(doc => {
+            snapshot.docs.forEach((doc) => {
                 favoriteEventIds.add(doc.data().eventId);
             });
-            setFavorites(favoriteEventIds); 
+            setFavorites(favoriteEventIds);
         });
 
         return unsubscribe;
@@ -50,7 +45,6 @@ export default function EventListScreen({ navigation }) {
         fetchFavorites();
     }, []);
 
-    // Use useFocusEffect to reload the events and favorites when the screen comes into focus
     useFocusEffect(
         React.useCallback(() => {
             fetchEvents();
@@ -58,34 +52,28 @@ export default function EventListScreen({ navigation }) {
         }, [])
     );
 
-    // Function to delete the event
     const deleteEvent = async (eventId) => {
-      try {
-          const eventRef = doc(db, 'events', eventId);
-          // Delete the event
-          await deleteDoc(eventRef);
-  
-          // Also delete the event from the favorites collection
-          const favoritesRef = collection(db, 'favorites');
-          const favoritesQuery = query(favoritesRef, where('eventId', '==', eventId));
-          const querySnapshot = await getDocs(favoritesQuery);
-  
-          querySnapshot.forEach(async (doc) => {
-              await deleteDoc(doc.ref);  // Delete the favorite document
-          });
-  
-          alert('Your event has been deleted successfully.');
-      } catch (error) {
-          alert('There was an issue deleting your event.');
-      }
-  };
+        try {
+            const eventRef = doc(db, 'events', eventId);
+            await deleteDoc(eventRef);
 
-    // Function to handle toggling favorites
+            const favoritesRef = collection(db, 'favorites');
+            const favoritesQuery = query(favoritesRef, where('eventId', '==', eventId));
+            const querySnapshot = await getDocs(favoritesQuery);
+
+            querySnapshot.forEach(async (doc) => {
+                await deleteDoc(doc.ref);
+            });
+
+            alert('Your event has been deleted successfully.');
+        } catch (error) {
+            alert('There was an issue deleting your event.');
+        }
+    };
+
     const toggleFavorite = async (eventId) => {
         const user = auth.currentUser;
-        if (!user) {
-            return;
-        }
+        if (!user) return;
 
         const favoritesRef = collection(db, 'favorites');
         const favoriteDoc = query(favoritesRef, where('userId', '==', user.uid), where('eventId', '==', eventId));
@@ -102,18 +90,18 @@ export default function EventListScreen({ navigation }) {
             });
         }
 
-        // After toggling the favorite, update the favorites state
-        fetchFavorites(); // Refresh the favorites list
+        fetchFavorites();
     };
 
     React.useLayoutEffect(() => {
         navigation.setOptions({
             headerRight: () => (
-                <Button
+                <TouchableOpacity
                     onPress={() => navigation.navigate('AddEditEvent')}
-                    title="Add Event"
-                    color="blue"
-                />
+                    style={styles.addButton}
+                >
+                    <Ionicons name="add-circle-outline" size={28} color="#007bff" />
+                </TouchableOpacity>
             ),
         });
     }, [navigation]);
@@ -122,15 +110,15 @@ export default function EventListScreen({ navigation }) {
         <View style={styles.container}>
             {auth.currentUser ? (
                 <>
-                    <Text style={styles.title}>Events</Text>
+                    <Text style={styles.title}>Your Events</Text>
                     <FlatList
                         data={events}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <EventCard
                                 event={item}
-                                isFavorite={favorites.has(item.id)} // Pass updated favorite status
-                                onFavoriteToggle={() => toggleFavorite(item.id)} 
+                                isFavorite={favorites.has(item.id)}
+                                onFavoriteToggle={() => toggleFavorite(item.id)}
                                 onEdit={(event) => navigation.navigate('AddEditEvent', { eventId: event.id, existingEvent: event })}
                                 onDelete={(eventId) => {
                                     Alert.alert(
@@ -144,6 +132,7 @@ export default function EventListScreen({ navigation }) {
                                 }}
                             />
                         )}
+                        ListEmptyComponent={<Text style={styles.emptyText}>No events found. Start by adding one!</Text>}
                     />
                 </>
             ) : (
@@ -154,7 +143,31 @@ export default function EventListScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20 },
-    title: { fontSize: 24, textAlign: 'center', marginBottom: 20 },
-    errorMessage: { fontSize: 16, textAlign: 'center', color: 'red' },
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f9fa',
+        padding: 20,
+    },
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#333',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    errorMessage: {
+        fontSize: 16,
+        color: '#d9534f',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    addButton: {
+        marginRight: 10,
+    },
 });
