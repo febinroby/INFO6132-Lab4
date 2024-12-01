@@ -2,21 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
 import EventCard from '../../components/EventCard';
 import { auth, db } from '../../config/firebaseConfig';
-import { collection, query, where, onSnapshot, doc, deleteDoc, getDocs, addDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, deleteDoc, getDocs, addDoc, where } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function EventListScreen({ navigation }) {
     const [events, setEvents] = useState([]);
-    const [favorites, setFavorites] = useState(new Set());
+    const [favorites, setFavorites] = useState([]);
 
     const fetchEvents = async () => {
         const user = auth.currentUser;
         if (!user) return;
 
-        const q = query(collection(db, 'events'), where('createdBy', '==', user.uid));
+        // Removed the query filter for 'createdBy' so all events are fetched
+        const q = query(collection(db, 'events'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedEvents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            console.log("Fetched Event Data:", fetchedEvents);
             setEvents(fetchedEvents);
         });
 
@@ -24,21 +26,21 @@ export default function EventListScreen({ navigation }) {
     };
 
     const fetchFavorites = async () => {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const favoritesRef = collection(db, 'favorites');
-        const q = query(favoritesRef, where('userId', '==', user.uid));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const favoriteEventIds = new Set();
-            snapshot.docs.forEach((doc) => {
-                favoriteEventIds.add(doc.data().eventId);
-            });
-            setFavorites(favoriteEventIds);
-        });
-
-        return unsubscribe;
-    };
+      const user = auth.currentUser;
+      if (!user) return;
+  
+      const favoritesRef = collection(db, 'favorites');
+      const q = query(favoritesRef, where('userId', '==', user.uid));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+          const favoriteEventIds = [];
+          snapshot.docs.forEach((doc) => {
+              favoriteEventIds.push(doc.data().eventId);
+          });
+          setFavorites(favoriteEventIds);  // Set the favorites array directly
+      });
+  
+      return unsubscribe;
+  };
 
     useEffect(() => {
         fetchEvents();
@@ -70,28 +72,44 @@ export default function EventListScreen({ navigation }) {
             alert('There was an issue deleting your event.');
         }
     };
-
+  
     const toggleFavorite = async (eventId) => {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const favoritesRef = collection(db, 'favorites');
-        const favoriteDoc = query(favoritesRef, where('userId', '==', user.uid), where('eventId', '==', eventId));
-        const querySnapshot = await getDocs(favoriteDoc);
-
-        if (querySnapshot.empty) {
-            await addDoc(favoritesRef, {
-                userId: user.uid,
-                eventId: eventId,
-            });
-        } else {
-            querySnapshot.forEach(async (doc) => {
-                await deleteDoc(doc.ref);
-            });
-        }
-
-        fetchFavorites();
-    };
+      const user = auth.currentUser;
+      console.log(user);
+      console.log(eventId);
+      if (!user) return;
+  
+      const favoritesRef = collection(db, 'favorites');
+      console.log(favoritesRef);
+      const favoriteDoc = query(
+          favoritesRef,
+          where('userId', '==', user.uid),
+          where('eventId', '==', eventId)
+      );
+      console.log(favoriteDoc);
+      const querySnapshot = await getDocs(favoriteDoc);
+  
+      try {
+          if (querySnapshot.empty) {
+              // Add to favorites
+              await addDoc(favoritesRef, {
+                  userId: user.uid,
+                  eventId: eventId,
+              });
+              console.log(`Event ID: ${eventId} added to favorites`);
+          } else {
+              // Remove from favorites
+              querySnapshot.forEach(async (doc) => {
+                  await deleteDoc(doc.ref);
+                  console.log(`Event ID: ${eventId} removed from favorites`);
+              });
+          }
+      } catch (error) {
+          console.error('Error updating favorites:', error);
+      }
+  
+      fetchFavorites(); // Refresh the favorites after toggling
+  };
 
     React.useLayoutEffect(() => {
         navigation.setOptions({
@@ -110,29 +128,30 @@ export default function EventListScreen({ navigation }) {
         <View style={styles.container}>
             {auth.currentUser ? (
                 <>
-                    <Text style={styles.title}>Your Events</Text>
+                    <Text style={styles.title}>All Events</Text>
                     <FlatList
-                        data={events}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item }) => (
-                            <EventCard
-                                event={item}
-                                isFavorite={favorites.has(item.id)}
-                                onFavoriteToggle={() => toggleFavorite(item.id)}
-                                onEdit={(event) => navigation.navigate('AddEditEvent', { eventId: event.id, existingEvent: event })}
-                                onDelete={(eventId) => {
-                                    Alert.alert(
-                                        'Delete Event',
-                                        'Are you sure you want to delete this event?',
-                                        [
-                                            { text: 'Cancel', style: 'cancel' },
-                                            { text: 'Delete', onPress: () => deleteEvent(eventId), style: 'destructive' },
-                                        ]
-                                    );
-                                }}
-                            />
-                        )}
-                        ListEmptyComponent={<Text style={styles.emptyText}>No events found. Start by adding one!</Text>}
+                      data={events}
+                      keyExtractor={(item) => item.id}
+                      renderItem={({ item }) => (
+                        <EventCard
+                          event={item}
+                          isFavorite={favorites.includes(item.id)}  // Check if event ID is in the favorites array
+                          onFavoriteToggle={() => toggleFavorite(item.id)}
+                          onEdit={(event) => navigation.navigate('AddEditEvent', { eventId: event.id, existingEvent: event })}
+                          onDelete={(eventId) => {
+                            Alert.alert(
+                              'Delete Event',
+                              'Are you sure you want to delete this event?',
+                              [
+                                { text: 'Cancel', style: 'cancel' },
+                                { text: 'Delete', onPress: () => deleteEvent(eventId), style: 'destructive' },
+                              ]
+                            );
+                          }}
+                          canEditDelete={auth.currentUser.uid === item.createdBy} // Pass this flag to EventCard
+                        />
+                      )}
+                      ListEmptyComponent={<Text style={styles.emptyText}>No events found. Start by adding one!</Text>}
                     />
                 </>
             ) : (

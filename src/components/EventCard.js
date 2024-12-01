@@ -1,80 +1,76 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons'; // For the heart icon
+import { Ionicons } from '@expo/vector-icons';
 
-const EventCard = ({ event, isFavorite, onFavoriteToggle, onEdit, onDelete }) => {
+const EventCard = ({ event, isFavorite, onFavoriteToggle, onEdit, onDelete, canEditDelete }) => {
     if (!event) return null;
 
     return (
-        <View style={styles.card}>
-            <Text style={styles.title}>{event.name || 'Untitled Event'}</Text>
-            <Text style={styles.description}>{event.description || 'No description provided'}</Text>
-            <View style={styles.buttonContainer}>
-                {event.createdBy && (
-                    <>
-                        <TouchableOpacity style={styles.editButton} onPress={() => onEdit(event)}>
-                            <Text style={styles.buttonText}>Edit</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.deleteButton} onPress={() => onDelete(event.id)}>
-                            <Text style={styles.buttonText}>Delete</Text>
-                        </TouchableOpacity>
-                    </>
-                )}
-                <TouchableOpacity onPress={onFavoriteToggle}>
-                    <FontAwesome
-                        name={isFavorite ? 'heart' : 'heart-o'}
-                        size={24}
-                        color={isFavorite ? '#e74c3c' : '#bdc3c7'}
-                    />
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
+      <View style={styles.card}>
+          <Text style={styles.title}>{event.name}</Text>
+          <Text style={styles.description}>{event.description}</Text>
+
+          {/* Favorite toggle button */}
+          <TouchableOpacity onPress={onFavoriteToggle} style={styles.favoriteButton}>
+              <Ionicons
+                  name={isFavorite ? 'heart' : 'heart-outline'}
+                  size={24}
+                  color={isFavorite ? '#e74c3c' : '#7f8c8d'}
+              />
+          </TouchableOpacity>
+
+          {/* Edit and delete buttons for event creator */}
+          {canEditDelete && (
+              <View style={styles.actions}>
+                  <TouchableOpacity onPress={() => onEdit(event)} style={styles.actionButton}>
+                      <Ionicons name="pencil" size={24} color="#3498db" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => onDelete(event.id)} style={styles.actionButton}>
+                      <Ionicons name="trash" size={24} color="#e74c3c" />
+                  </TouchableOpacity>
+              </View>
+          )}
+      </View>
+  );
 };
 
 const styles = StyleSheet.create({
     card: {
         padding: 20,
-        marginVertical: 15,
+        marginVertical: 12,
         backgroundColor: '#fff',
-        borderRadius: 10,
+        borderRadius: 12,
         shadowColor: '#333',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 5,
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 6,
+        marginHorizontal: 16,
     },
     title: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
-        marginBottom: 8,
         color: '#2c3e50',
+        marginBottom: 8,
     },
     description: {
         fontSize: 16,
         color: '#7f8c8d',
-        marginBottom: 15,
+        marginBottom: 18,
+        lineHeight: 22,
     },
-    buttonContainer: {
+    favoriteButton: {
+        position: 'absolute',
+        top: 15,
+        right: 20,
+    },
+    actions: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        justifyContent: 'flex-end',
+        marginTop: 10,
     },
-    editButton: {
-        backgroundColor: '#3498db',
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 5,
-    },
-    deleteButton: {
-        backgroundColor: '#e74c3c',
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 5,
-    },
-    buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
+    actionButton: {
+        marginLeft: 15,
     },
 });
 
