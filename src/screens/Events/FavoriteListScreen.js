@@ -22,7 +22,6 @@ export default function FavoriteListScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Favorites</Text>
             <FlatList
                 data={favorites}
                 keyExtractor={(item) => item.id}

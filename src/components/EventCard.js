@@ -1,44 +1,50 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
-import { auth, db } from '../config/firebaseConfig';
-import { addDoc, collection, deleteDoc, doc } from 'firebase/firestore';
+import { auth } from '../config/firebaseConfig';
 
-export default function EventCard({ event, onEdit, onDelete }) {
-    const handleAddToFavorites = async () => {
-        try {
-            await addDoc(collection(db, 'favorites'), {
-                name: event.name,
-                description: event.description,
-                userId: auth.currentUser.uid,
-            });
-            alert('Event added to favorites!');
-        } catch (error) {
-            alert(error.message);
-        }
-    };
+const EventCard = ({ event, onEdit, onDelete }) => {
+    const user = auth.currentUser;
+
+    // Validate event data
+    if (!event) {
+        console.warn('Event is undefined');
+        return null;
+    }
+
+    // Validate user authentication
+    if (!user) {
+        console.warn('User is not logged in');
+        return null;
+    }
+
+    const isOwner = user.uid === event.createdBy;
 
     return (
         <View style={styles.card}>
-            <Text style={styles.title}>{event.name}</Text>
-            <Text style={styles.description}>{event.description}</Text>
-            {event.createdBy === auth.currentUser.uid && (
-                <View style={styles.actions}>
+            <Text style={styles.title}>{event.name || 'Untitled Event'}</Text>
+            <Text style={styles.description}>{event.description || 'No description provided'}</Text>
+
+            {isOwner && (
+                <View style={styles.buttonContainer}>
                     <Button title="Edit" onPress={() => onEdit(event)} />
-                    <Button title="Delete" onPress={() => onDelete(event.id)} />
+                    <Button title="Delete" onPress={() => onDelete(event.id)} color="red" />
                 </View>
             )}
-            <Button title="Favorite" onPress={handleAddToFavorites} />
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     card: {
-        padding: 20,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
+        padding: 15,
+        marginVertical: 10,
+        backgroundColor: '#ffffff',
+        borderRadius: 10,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
     },
     title: {
         fontSize: 18,
@@ -47,11 +53,13 @@ const styles = StyleSheet.create({
     },
     description: {
         fontSize: 14,
+        color: '#555',
         marginBottom: 10,
     },
-    actions: {
+    buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 10,
     },
 });
+
+export default EventCard;
