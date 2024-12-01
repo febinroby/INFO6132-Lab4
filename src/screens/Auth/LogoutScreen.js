@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     },
     card: {
         width: '80%',
-        backgroundColor: '#d9534f', // Red color for logout button
+        backgroundColor: '#d9534f',
         borderRadius: 10,
         elevation: 5,
         shadowColor: '#333',

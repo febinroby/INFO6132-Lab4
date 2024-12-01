@@ -10,7 +10,6 @@ const EventCard = ({ event, isFavorite, onFavoriteToggle, onEdit, onDelete, canE
           <Text style={styles.title}>{event.name}</Text>
           <Text style={styles.description}>{event.description}</Text>
 
-          {/* Favorite toggle button */}
           <TouchableOpacity onPress={onFavoriteToggle} style={styles.favoriteButton}>
               <Ionicons
                   name={isFavorite ? 'heart' : 'heart-outline'}
@@ -19,7 +18,6 @@ const EventCard = ({ event, isFavorite, onFavoriteToggle, onEdit, onDelete, canE
               />
           </TouchableOpacity>
 
-          {/* Edit and delete buttons for event creator */}
           {canEditDelete && (
               <View style={styles.actions}>
                   <TouchableOpacity onPress={() => onEdit(event)} style={styles.actionButton}>

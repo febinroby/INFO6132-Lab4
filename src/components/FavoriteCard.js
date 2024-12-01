@@ -4,11 +4,9 @@ import { db } from '../config/firebaseConfig';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
 export default function FavoriteCard({ favorite, onRemove }) {
-
-    // Validate that the required fields exist in the favorite object
     if (!favorite || !favorite.eventData || !favorite.eventId || !favorite.userId) {
         console.error('Invalid favorite object:', favorite);
-        return <Text style={styles.errorText}>Invalid favorite object</Text>; // Display error message in UI
+        return <Text style={styles.errorText}>Invalid favorite object</Text>;
     }
 
     const handleRemoveFavorite = async () => {
@@ -20,7 +18,6 @@ export default function FavoriteCard({ favorite, onRemove }) {
                 where('eventId', '==', favorite.eventId)
             );
 
-            // Fetch the matching document
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
@@ -28,12 +25,11 @@ export default function FavoriteCard({ favorite, onRemove }) {
                 return;
             }
 
-            // Since no duplicates are allowed, safely delete the single document
             const docId = querySnapshot.docs[0].id;
             await deleteDoc(doc(db, 'favorites', docId));
 
             alert('Event removed from favorites!');
-            if (onRemove) onRemove(favorite.eventId); // Trigger callback to refresh UI
+            if (onRemove) onRemove(favorite.eventId);
         } catch (error) {
             console.error('Error removing favorite:', error.message);
             alert('Failed to remove favorite. Please try again.');

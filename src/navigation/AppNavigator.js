@@ -7,7 +7,7 @@ import FavoriteListScreen from '../screens/Events/FavoriteListScreen';
 import LogoutScreen from '../screens/Auth/LogoutScreen';
 import LoginScreen from '../screens/Auth/LoginScreen';
 import SignUpScreen from '../screens/Auth/SignUpScreen';
-import AddEditEventScreen from '../screens/Events/AddEditEventScreen'; // Import the AddEditEvent screen
+import AddEditEventScreen from '../screens/Events/AddEditEventScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const Tab = createBottomTabNavigator();
@@ -52,7 +52,7 @@ export default function AppNavigator() {
                 {/* Main App Screens */}
                 <Stack.Screen name="Main" component={MainTabs} />
 
-                {/* AddEditEvent Screen (not in the bottom tab, only in the stack) */}
+                {/* AddEditEvent Screen */}
                 <Stack.Screen name="AddEditEvent" component={AddEditEventScreen} />
             </Stack.Navigator>
         </NavigationContainer>
