@@ -12,7 +12,6 @@ export default function EventListScreen({ navigation }) {
     const fetchEvents = async () => {
         const user = auth.currentUser;
         if (!user) {
-            console.error('No user is logged in');
             return;
         }
 
@@ -42,9 +41,21 @@ export default function EventListScreen({ navigation }) {
         try {
             const eventRef = doc(db, 'events', eventId);
             await deleteDoc(eventRef);
-            console.log('Event deleted successfully');
+            Alert.alert(
+              'Success',
+              'Your event has been deleted',
+              [
+                  { text: 'OK', style: 'default' }
+              ]
+            );
         } catch (error) {
-            console.error('Error deleting event: ', error);
+          Alert.alert(
+            'Failed',
+            'Your event could not be deleted',
+            [
+                { text: 'OK', style: 'default' }
+            ]
+          );
         }
     };
 
