@@ -22,12 +22,14 @@ export default function LoginScreen({ navigation }) {
             <TextInput
                 style={styles.input}
                 placeholder="Email"
+                autoCapitalize="none"
                 value={email}
                 onChangeText={setEmail}
             />
             <TextInput
                 style={styles.input}
                 placeholder="Password"
+                autoCapitalize="none"
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}

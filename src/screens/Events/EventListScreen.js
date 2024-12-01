@@ -19,7 +19,6 @@ export default function EventListScreen({ navigation }) {
         const q = query(collection(db, 'events'), where('createdBy', '==', user.uid));  // Filter events by owner
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedEvents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            console.log('Fetched events:', fetchedEvents); // Log fetched events
             setEvents(fetchedEvents);
         });
 
